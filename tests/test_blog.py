@@ -1,7 +1,8 @@
 import pytest
 from flask.testing import FlaskClient
+from sqlalchemy import select
 
-from flaskr import db
+from flaskr import db, models
 
 
 def test_index(client: FlaskClient):
@@ -50,11 +51,9 @@ def test_create(client: FlaskClient):
         "/create", data={"title": "test_create title", "body": "test_create body"}
     )
 
-    conn = db.get_db()
-    body = conn.execute(
-        "SELECT body FROM post WHERE title = 'test_create title'"
-    ).fetchone()[0]
-    assert body == "test_create body"
+    query = select(models.Post).where(models.Post.title == "test_create title")
+    post = db.get_db_session().scalars(query).one()
+    assert post.body == "test_create body"
 
 
 def test_update(client: FlaskClient):
@@ -63,7 +62,7 @@ def test_update(client: FlaskClient):
     assert client.get("/1/update").status_code == 200
     client.post("/1/update", data={"title": "updated title", "body": "updated body"})
 
-    conn = db.get_db()
-    post = conn.execute("SELECT * FROM post WHERE id = 1").fetchone()
-    assert post["title"] == "updated title"
-    assert post["body"] == "updated body"
+    query = select(models.Post).where(models.Post.id == 1)
+    post = db.get_db_session().scalars(query).one()
+    assert post.title == "updated title"
+    assert post.body == "updated body"

@@ -1,8 +1,9 @@
 import pytest
 from flask import g, session
 from flask.testing import FlaskClient
+from sqlalchemy import select
 
-from flaskr import db
+from flaskr import db, models
 
 
 def test_register_get(client: FlaskClient):
@@ -17,10 +18,8 @@ def test_register_post(client: FlaskClient):
     assert response.status_code == 302
     assert response.headers["Location"] == "/auth/login"
 
-    assert (
-        db.get_db().execute("SELECT * FROM user WHERE username = 'a'").fetchone()
-        is not None
-    )
+    query = select(models.User).where(models.User.username == "a")
+    assert db.get_db_session().execute(query).one_or_none() is not None
 
 
 @pytest.mark.parametrize(
@@ -46,7 +45,7 @@ def test_login(client):
     with client:
         client.get("/")
         assert session["user_id"] == 1
-        assert g.user["username"] == "test"
+        assert g.user.username == "test"
 
 
 @pytest.mark.parametrize(
@@ -76,9 +75,8 @@ def test_create_update_validate(client: FlaskClient, path: str):
     response = client.post(path, data={"title": "", "body": "invalid post"})
     assert b"Title is required." in response.data
 
-    conn = db.get_db()
-    post = conn.execute("SELECT * FROM post WHERE body = 'invalid post'").fetchone()
-    assert post is None
+    query = select(models.Post).where(models.Post.body == "invalid post")
+    assert db.get_db_session().execute(query).one_or_none() is None
 
 
 def test_delete(client: FlaskClient):
@@ -87,6 +85,5 @@ def test_delete(client: FlaskClient):
     response = client.post("/1/delete")
     assert response.headers["Location"] == "/"
 
-    conn = db.get_db()
-    post = conn.execute("SELECT * FROM post WHERE id = 1").fetchone()
-    assert post is None
+    query = select(models.Post).where(models.Post.id == 1)
+    assert db.get_db_session().execute(query).one_or_none() is None

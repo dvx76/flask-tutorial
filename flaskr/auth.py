@@ -1,5 +1,6 @@
 import functools
 
+import sqlalchemy.exc
 from flask import (
     Blueprint,
     flash,
@@ -10,9 +11,11 @@ from flask import (
     session,
     url_for,
 )
+from sqlalchemy import select
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .db import get_db
+from .db import get_db_session
+from .models import User
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -30,19 +33,13 @@ def register():
             error = "Password is required."
 
         if error is None:
-            db = get_db()
-            print(f"{db=}")
+            db_session = get_db_session()
+            user = User(username=username, password=generate_password_hash(password))
+            db_session.add(user)
             try:
-                db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)",
-                    (username, generate_password_hash(password)),
-                )
-                db.commit()
-            except db.IntegrityError:
+                db_session.commit()
+            except sqlalchemy.exc.IntegrityError:
                 error = f"User {username} is already registered."
-            except Exception as err:
-                print(f"{err=}")
-                raise
             else:
                 return redirect(url_for("auth.login"))
 
@@ -56,20 +53,20 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        db = get_db()
         error = None
-        user_row = db.execute(
-            "SELECT * FROM user WHERE username = ?", (username,)
-        ).fetchone()
+        db_session = get_db_session()
+        user = db_session.scalars(
+            select(User).where(User.username == username)
+        ).one_or_none()
 
-        if user_row is None:
+        if user is None:
             error = "Incorrect username."
-        elif not check_password_hash(user_row["password"], password):
+        elif not check_password_hash(user.password, password):
             error = "Incorrect password."
 
         if error is None:
             session.clear()
-            session["user_id"] = user_row["id"]
+            session["user_id"] = user.id
             return redirect(url_for("blog.index"))
 
         flash(error)
@@ -84,9 +81,10 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = (
-            get_db().execute("SELECT * FROM user WHERE id = ?", (user_id,)).fetchone()
-        )
+        db_session = get_db_session()
+        g.user = db_session.scalars(
+            select(User).where(User.id == user_id)
+        ).one_or_none()
 
 
 def login_required(view):

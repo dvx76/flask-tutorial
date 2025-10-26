@@ -1,32 +1,42 @@
-import sqlite3
+import sys
 from pathlib import Path
+from typing import Callable, Optional
 
-from flask import current_app, g
+from flask import current_app
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, scoped_session, sessionmaker
 
+from .models import Base
 
-def get_db() -> sqlite3.Connection:
-    if "db" not in g:
-        g.db = sqlite3.connect(current_app.config["DATABASE"], uri=True)
-        g.db.row_factory = sqlite3.Row
-    return g.db
-
-
-def close_db(_exc=None):
-    if "db" in g:
-        g.db.close()
+LOCAL_DIRECTORY = Path(__file__).parent
+SQLITE_DB_FILE = str(LOCAL_DIRECTORY / "flaskr.sqlite")
+DEFAULT_DATABASE_URL = f"sqlite:///{Path(__file__).parent / 'flaskr.sqlite'}"
 
 
-def init_db(database: str = "flaskr.sqlite"):
-    db = sqlite3.connect(database, uri=True)
+def create_db_session(
+    database_url: Optional[str],
+) -> tuple[scoped_session[Session], Callable]:
+    database_url = database_url if database_url else DEFAULT_DATABASE_URL
+    engine = create_engine(database_url)
+    db_session = scoped_session(
+        sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    )
 
-    with open(Path(__file__).parent / "schema.sql") as schema:
-        db.executescript(schema.read())
+    def remove_session(_exc=None):
+        db_session.remove()
 
-    print("SQLite schema created. Tables in DB:")
-    result = db.execute("SELECT name FROM sqlite_master WHERE type='table'")
-    print(result.fetchall())
-    # db.close()
+    return (db_session, remove_session)
+
+
+def init_db(database_url: str):
+    engine = create_engine(database_url, echo=True)
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
+
+
+def get_db_session() -> scoped_session[Session]:
+    return current_app.config["DB_SESSION"]
 
 
 if __name__ == "__main__":
-    init_db()
+    init_db(sys.argv[1])

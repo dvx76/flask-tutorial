@@ -1,19 +1,22 @@
+from typing import Any, Mapping, Optional
+
 from flask import Flask
 
 from . import auth, blog, db
 
 
-def create_app(database: str = "flaskr.sqlite") -> Flask:
+def create_app(test_config: Optional[Mapping[str, Any]] = None) -> Flask:
     app = Flask(__name__)
-    app.config["DATABASE"] = database
-    app.secret_key = "dev"
+    app.config.from_object("flaskr.settings")
+    app.config.from_envvar("FLASKR_SETTINGS", silent=True)
+    if test_config:
+        app.config.from_mapping(test_config)
     app.jinja_options["autoescape"] = True
 
-    @app.route("/ping")
-    def ping():
-        return "pong"
+    db_session, remove_session = db.create_db_session(app.config["DATABASE_URL"])
+    app.config["DB_SESSION"] = db_session
 
-    app.teardown_appcontext(db.close_db)
+    app.teardown_appcontext(remove_session)
     app.register_blueprint(auth.bp)
     app.register_blueprint(blog.bp)
 
