@@ -1,0 +1,137 @@
+openapi: 3.0.3
+info:
+  title: Flaskr Blog API
+  version: 1.0.0
+  description: API for the Flaskr blog
+
+paths:
+  /posts:
+    get:
+      summary: List all posts
+      operationId: flaskr.app.get_all_posts
+      responses:
+        "200":
+          description: A list of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+
+    post:
+      summary: Create a new post
+      operationId: flaskr.app.create_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewPost"
+      responses:
+        "201":
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+      security:
+        - basic: []
+
+  /posts/{id}:
+    get:
+      summary: Get a single post
+      operationId: flaskr.app.get_post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A single post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "404":
+          description: Post not found
+
+    put:
+      summary: Update a post
+      operationId: flaskr.app.update_post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: integer}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewPost"
+      responses:
+        "200":
+          description: Updated post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "400":
+          description: Invalid input
+        "404":
+          description: Post not found
+      security:
+        - basic: []
+
+    delete:
+      summary: Delete a post
+      operationId: flaskr.app.delete_post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: integer}
+      responses:
+        "204":
+          description: Post deleted
+        "404":
+          description: Post not found
+      security:
+        - basic: []
+
+components:
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
+      x-basicInfoFunc: flaskr.app.auth
+
+  schemas:
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+        author:
+          type: string
+        created:
+          type: string
+          format: date-time
+        title:
+          type: string
+        body:
+          type: string
+
+    NewPost:
+      type: object
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+      required:
+        - title
+        - body
