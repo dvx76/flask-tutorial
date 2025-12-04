@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -14,7 +13,7 @@ DEFAULT_DATABASE_URL = f"sqlite:///{Path(__file__).parent / 'flaskr.sqlite'}"
 
 
 def create_db_session(
-    database_url: Optional[str],
+    database_url: Optional[str] = None,
 ) -> tuple[scoped_session[Session], Callable]:
     database_url = database_url if database_url else DEFAULT_DATABASE_URL
     engine = create_engine(database_url)
@@ -28,7 +27,7 @@ def create_db_session(
     return (db_session, remove_session)
 
 
-def init_db(database_url: str):
+def init_db(database_url: str = DEFAULT_DATABASE_URL):
     engine = create_engine(database_url, echo=True)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
@@ -39,4 +38,4 @@ def get_db_session() -> scoped_session[Session]:
 
 
 if __name__ == "__main__":
-    init_db(sys.argv[1])
+    init_db()
