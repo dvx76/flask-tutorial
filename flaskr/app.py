@@ -1,5 +1,6 @@
 import connexion
-from sqlalchemy import select
+from flask import request
+from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload
 from werkzeug.security import check_password_hash
 
@@ -41,11 +42,28 @@ def _post_to_dict(post: Post) -> dict:
     }
 
 
-def get_all_posts():
+def get_all_posts(limit: int = 20, offset: int = 0):
     posts = db_session.scalars(
-        select(Post).options(joinedload(Post.author)).order_by(Post.created.desc())
+        select(Post)
+        .options(joinedload(Post.author))
+        .order_by(Post.created.desc())
+        .limit(limit)
+        .offset(offset)
     )
-    return [_post_to_dict(post) for post in posts]
+    posts_list = [_post_to_dict(post) for post in posts]
+
+    total = db_session.scalar(select(func.count()).select_from(Post)) or 0
+
+    base_url = request.url_root.rstrip("/")
+    _links = {"self": f"{base_url}/posts?limit={limit}&offset={offset}"}
+    if offset > 0:
+        _links["prev"] = (
+            f"{base_url}/posts?limit={limit}&offset={max(0, offset - limit)}"
+        )
+    if offset + limit < total:
+        _links["next"] = f"{base_url}/posts?limit={limit}&offset={offset + limit}"
+
+    return {"items": posts_list, "_links": _links}
 
 
 def create_post(body: dict, token_info: dict):

@@ -9,15 +9,29 @@ paths:
     get:
       summary: List all posts
       operationId: flaskr.app.get_all_posts
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Maximum number of posts to return
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of posts to skip
       responses:
         "200":
-          description: A list of posts
+          description: A paginated list of posts
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Post"
+                $ref: "#/components/schemas/PaginatedPosts"
 
     post:
       summary: Create a new post
@@ -135,3 +149,22 @@ components:
       required:
         - title
         - body
+
+    PaginatedPosts:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Post"
+        _links:
+          type: object
+          properties:
+            self:
+              type: string
+            next:
+              type: string
+            prev:
+              type: string
+          required:
+            - self
