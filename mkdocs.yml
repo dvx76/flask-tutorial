@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+site_name: FlaskR
+site_url: https://dvx76.github.io/flask-tutorial/
+site_description: A simple blog app made with Flask
+site_author: Fabrice Devaux
+copyright: Copyright © 2026 Fabrice Devaux
+repo_url: https://github.com/dvx76/flask-tutorial
+
+theme:
+  name: material
+  language: en
+  font:
+    text: Sansation # Default: Roboto
+    code: Fire Code # Roboto Mono
+  palette:
+    - scheme: default
+      primary: red
+      accent: orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: green
+      accent: lime
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - search.suggest
+    - search.highlight
+
+markdown_extensions:
+  - material.extensions.preview:
+      configurations:
+        - targets:
+            include:
+              - reference.md
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.tabbed:
+      alternate_style: true
+
+plugins:
+  - blog
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            members_order: source
+            show_root_full_path: false
+            show_source: false
+
+nav:
+  - Home: index.md
+  - User Guide:
+    - Getting Started: user-guide/getting-started.md
+    - Installation: user-guide/installation.md
+  - About: about.md
+  - Reference: reference.md
+  - blog: blog/index.md
+
+watch:
+  - flaskr
