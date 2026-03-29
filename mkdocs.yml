@@ -57,6 +57,7 @@ markdown_extensions:
 plugins:
   - blog
   - search
+  - render_swagger
   - mkdocstrings:
       handlers:
         python:
@@ -73,6 +74,7 @@ nav:
     - Installation: user-guide/installation.md
   - About: about.md
   - Reference: reference.md
+  - API: api.md
   - blog: blog/index.md
 
 watch:
