@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 site_name: FlaskR
-site_url: https://dvx76.github.io/flask-tutorial/
+site_url: !ENV [READTHEDOCS_CANONICAL_URL, "https://dvx76.github.io/flask-tutorial/"]
 site_description: A simple blog app made with Flask
 site_author: Fabrice Devaux
 copyright: Copyright © 2026 Fabrice Devaux

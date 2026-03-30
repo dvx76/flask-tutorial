@@ -7,7 +7,6 @@ requires-python = ">=3.13"
 dependencies = [
     "coverage>=7.10.7",
     "flask~=3.0",
-    "mkdocs-render-swagger-plugin>=0.1.2",
     "psycopg2>=2.9.11",
     "pytest>=8.4.2",
     "sqlalchemy>=2.0.44",
@@ -21,4 +20,5 @@ dev = [
     "mkdocs~=1.6",
     "mkdocs-material>=9.7.6",
     "mkdocstrings[python]~=1.0",
+    "mkdocs-render-swagger-plugin>=0.1.2",
 ]
