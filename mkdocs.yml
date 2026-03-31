@@ -9,44 +9,38 @@ repo_url: https://github.com/dvx76/flask-tutorial
 theme:
   name: material
   language: en
-  font:
-    text: Sansation # Default: Roboto
-    code: Fire Code # Roboto Mono
   palette:
-    - scheme: default
-      primary: red
-      accent: orange
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - scheme: slate
-      primary: green
-      accent: lime
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
+  - media: (prefers-color-scheme)
+    toggle:
+      icon: material/lightbulb-auto
+      name: Switch to light mode
+  - media: '(prefers-color-scheme: light)'
+    scheme: default
+    primary: teal
+    accent: amber
+    toggle:
+      icon: material/lightbulb
+      name: Switch to dark mode
+  - media: '(prefers-color-scheme: dark)'
+    scheme: slate
+    primary: teal
+    accent: amber
+    toggle:
+      icon: material/lightbulb-outline
+      name: Switch to system preference
   features:
     - content.code.copy
     - content.code.select
     - content.code.annotate
-    - navigation.instant
-    - navigation.instant.prefetch
-    - navigation.tabs
-    - navigation.tabs.sticky
     - search.suggest
     - search.highlight
 
 markdown_extensions:
-  - material.extensions.preview:
-      configurations:
-        - targets:
-            include:
-              - reference.md
+  - attr_list
+  - md_in_html
   - admonition
   - pymdownx.details
   - pymdownx.superfences
-  - attr_list
-  - md_in_html
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -56,8 +50,8 @@ markdown_extensions:
 
 plugins:
   - blog
-  - search
   - render_swagger
+  - search
   - mkdocstrings:
       handlers:
         python:
@@ -77,5 +71,5 @@ nav:
   - API: api.md
   - blog: blog/index.md
 
-watch:
-  - flaskr
+# watch:
+#   - flaskr
