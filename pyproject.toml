@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "coverage>=7.10.7",
     "flask~=3.0",
+    "gunicorn>=25.3.0",
     "psycopg2>=2.9.11",
     "pytest>=8.4.2",
     "sqlalchemy>=2.0.44",
